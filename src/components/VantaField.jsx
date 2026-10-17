@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from '../lib/motion';
 import { holdIntro } from '../lib/intro';
+import { inOwnFrame } from '../lib/frames';
 import './VantaField.css';
 
 /*
@@ -41,20 +42,33 @@ export default function VantaField() {
         const mod = await import('vanta/dist/vanta.fog.min.js');
         // The UMD build is exposed differently by different bundlers; the global registry is the fallback.
         const FOG = [mod?.default, mod?.default?.default, mod, window.VANTA?.FOG].find(f => typeof f === 'function');
-        if (cancelled || !fogRef.current || !FOG) return;
-        effect = FOG({
-          el: fogRef.current,
-          THREE,
-          mouseControls: false,
-          touchControls: false,
-          gyroControls: false,
-          minHeight: 200,
-          minWidth: 200,
-          ...FOG_OPTIONS
-        });
+        if (!FOG) return;
+        // Vanta creates its renderer and compiles its shader right here: a heavy job, so it gets a frame
+        // of its own, never shared with the shelf's set-up (see lib/frames.js).
+        effect = await inOwnFrame(() =>
+          cancelled || !fogRef.current
+            ? null
+            : FOG({
+                el: fogRef.current,
+                THREE,
+                mouseControls: false,
+                touchControls: false,
+                gyroControls: false,
+                minHeight: 200,
+                minWidth: 200,
+                ...FOG_OPTIONS
+              })
+        );
+        if (!effect) return;
+        if (cancelled) {
+          effect.destroy?.();
+          effect = null;
+          return;
+        }
         if (fogRef.current.querySelector('canvas')) setReady(true);
-        // Let the first frames draw (that is when the shader compiles) before the intro may open.
+        // Let the first frames draw before the intro may open.
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        if (cancelled) return;
         // Vanta keeps its loop running even when it skips drawing; stop it outright while the hero is off screen.
         io = new IntersectionObserver(([entry]) => {
           if (!effect) return;

@@ -7,6 +7,7 @@ import { holdIntro, introWillPlay, useIntroDone } from '../lib/intro';
 import { RichText, SectionHead } from '../components/Bits';
 import { ArrowLeft, ArrowUpRight, ChevronLeft, ChevronRight } from '../components/Icons';
 import { themeFor } from '../shelf/theme';
+import { inOwnFrame } from '../lib/frames';
 import PiiDemo from './PiiDemo';
 import KnnDemo from './KnnDemo';
 import './Shelf.css';
@@ -272,22 +273,24 @@ export default function Shelf() {
       io.disconnect();
       setMode('loading');
       import('../shelf/ShelfScene.js').then(
-        ({ ShelfScene }) => {
-          if (cancelled || !canvasRef.current) return built();
-          try {
-            scene = new ShelfScene({
-              canvas: canvasRef.current,
-              volumes,
-              reduced: prefersReducedMotion(),
-              onEvent: (t, d) => handlerRef.current(t, d)
-            });
-          } catch {
-            setMode('fallback');
-            return built();
-          }
-          sceneRef.current = scene;
-          scene.init().then(built, built);
-        },
+        // Creating the WebGL renderer is a heavy job of its own: give it a frame to itself.
+        ({ ShelfScene }) =>
+          inOwnFrame(() => {
+            if (cancelled || !canvasRef.current) return built();
+            try {
+              scene = new ShelfScene({
+                canvas: canvasRef.current,
+                volumes,
+                reduced: prefersReducedMotion(),
+                onEvent: (t, d) => handlerRef.current(t, d)
+              });
+            } catch {
+              setMode('fallback');
+              return built();
+            }
+            sceneRef.current = scene;
+            scene.init().then(built, built);
+          }),
         () => {
           built();
           if (!cancelled) setMode('fallback');

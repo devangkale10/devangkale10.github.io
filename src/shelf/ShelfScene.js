@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 import { hashSeed, makeCanvas, rng, woodCanvas } from './art.js';
 import { BOARD, Book, GAP, sharedTextures } from './book.js';
 import { SHELF_BG, themeFor } from './theme.js';
+import { inOwnFrame } from '../lib/frames.js';
 
 /*
  * The shelf: one clothbound volume per piece of work, standing on a walnut plank.
@@ -144,32 +145,47 @@ export class ShelfScene {
     renderer.setClearColor(SHELF_BG, 1);
     this.renderer = renderer;
 
-    const small = Math.min(window.screen?.width || 1200, window.screen?.height || 1200) < 700;
-    this.shared = sharedTextures(renderer, { quality: small ? 0.72 : 1 });
-
-    const scene = new THREE.Scene();
-    this.scene = scene;
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const room = new RoomEnvironment();
-    this.envRT = pmrem.fromScene(room, 0.04);
-    room.dispose();
-    pmrem.dispose();
-    scene.environment = this.envRT.texture;
-    scene.environmentIntensity = 0.32;
-
+    this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 80);
-
-    this.buildLights();
-    this.buildShelf();
-    this.buildOverlays();
-
-    this.rig = new THREE.Group();
-    scene.add(this.rig);
-
-    this.bind();
-    this.resize();
     this.tick = this.tick.bind(this);
-    gsap.ticker.add(this.tick);
+    // The rest of the set-up (textures, environment, room) runs in setup(), a piece per frame.
+  }
+
+  /**
+   * The heavy set-up, split so each piece runs in a frame of its own (see lib/frames.js): textures,
+   * the environment map, then the room. Only after that does the scene take input and draw.
+   */
+  async setup() {
+    const steps = [
+      () => {
+        const small = Math.min(window.screen?.width || 1200, window.screen?.height || 1200) < 700;
+        this.shared = sharedTextures(this.renderer, { quality: small ? 0.72 : 1 });
+      },
+      () => {
+        const pmrem = new THREE.PMREMGenerator(this.renderer);
+        const room = new RoomEnvironment();
+        this.envRT = pmrem.fromScene(room, 0.04);
+        room.dispose();
+        pmrem.dispose();
+        this.scene.environment = this.envRT.texture;
+        this.scene.environmentIntensity = 0.32;
+      },
+      () => {
+        this.buildLights();
+        this.buildShelf();
+        this.buildOverlays();
+        this.rig = new THREE.Group();
+        this.scene.add(this.rig);
+        this.bind();
+        this.resize();
+        gsap.ticker.add(this.tick);
+      }
+    ];
+    for (const step of steps) {
+      await inOwnFrame(() => this.disposed || step());
+      if (this.disposed) return false;
+    }
+    return true;
   }
 
   /* ---------- construction ---------- */
@@ -295,7 +311,9 @@ export class ShelfScene {
    * milliseconds' worth per frame so building never competes with scrolling.
    */
   async init() {
-    await fontsReady();
+    const fonts = fontsReady();
+    if (!(await this.setup())) return;
+    await fonts;
     if (this.disposed) return;
     const order = [this.index];
     for (let d = 1; order.length < this.N; d++) {
@@ -304,13 +322,15 @@ export class ShelfScene {
     }
     this.queue = order;
     // A few milliseconds of building per frame: quick, but never long enough to stutter a scroll.
-    const frame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
+    // Queued with the page's other heavy jobs, so a batch never shares a frame with one of them.
     while (this.queue.length) {
-      await frame();
+      await inOwnFrame(() => {
+        if (this.disposed) return;
+        const start = performance.now();
+        do this.buildNext();
+        while (this.queue.length && performance.now() - start < 8);
+      });
       if (this.disposed) return;
-      const start = performance.now();
-      do this.buildNext();
-      while (this.queue.length && performance.now() - start < 8);
     }
   }
 
@@ -1306,15 +1326,17 @@ export class ShelfScene {
     c.removeEventListener('webglcontextlost', this.onLost);
     this.ro?.disconnect();
     this.io?.disconnect();
-    this.statics.forEach(x => x.dispose());
+    // set-up may have stopped part way (the section left before it finished), so each piece is optional
+    this.statics?.forEach(x => x.dispose());
     [this.scrim, this.glow].forEach(m => {
+      if (!m) return;
       m.geometry.dispose();
       m.material.dispose();
     });
     const sh = this.shared;
-    [sh.clothNormal, sh.edgeV, sh.edgeH, sh.paper, sh.shadow, this.glowTex].forEach(t => t.dispose());
-    this.envRT.dispose();
-    this.spot.shadow.map?.dispose();
+    [sh?.clothNormal, sh?.edgeV, sh?.edgeH, sh?.paper, sh?.shadow, this.glowTex].forEach(t => t?.dispose());
+    this.envRT?.dispose();
+    this.spot?.shadow.map?.dispose();
     this.renderer.dispose();
   }
 }

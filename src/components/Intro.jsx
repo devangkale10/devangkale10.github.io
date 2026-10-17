@@ -79,7 +79,6 @@ export default function Intro() {
     gsap.set(q('.intro__grid'), { scale: 1, opacity: 1 });
     gsap.set(q('.intro__flash'), { scale: 0.2, opacity: 0 });
     gsap.set(q('.intro__mark'), { rotation: 0 });
-    gsap.set(page, { scale: 1.07, filter: 'blur(10px)', transformOrigin: '50% 40vh' });
 
     // Under two seconds, paced so each status line can be read:
     // "cleaning the data…" up to 54%, "almost there…" to 92%, then "ok, it's clean." before the opening.
@@ -107,8 +106,11 @@ export default function Intro() {
 
     // The grand entrance: 100% and "ok, it's clean." hold for a beat, then the points fall together
     // and the aperture opens, in one continuous move.
+    // The page is only blurred and scaled up once the exit starts: until then the veil hides it completely,
+    // and blurring a page full of live canvases every frame would just slow the loading down.
     exit
-      .to(count, { v: 100, duration: 0.25, ease: 'power1.out', onUpdate: setCount })
+      .set(page, { scale: 1.07, filter: 'blur(10px)', transformOrigin: '50% 40vh' }, 0)
+      .to(count, { v: 100, duration: 0.25, ease: 'power1.out', onUpdate: setCount }, 0)
       .to(dots, { x: 0, y: 0, duration: 0.32, ease: 'power3.in' }, 0.55)
       .to(q('.intro__flash'), { opacity: 1, scale: 1, duration: 0.2, ease: 'power2.out' }, 0.81)
       .addLabel('open', 0.85)

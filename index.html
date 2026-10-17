@@ -20,6 +20,11 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0E13'/%3E%3Ccircle cx='9.5' cy='22.5' r='3.6' fill='%233A9FD4'/%3E%3Ccircle cx='16' cy='16' r='3.6' fill='%23BF8420'/%3E%3Ccircle cx='22.5' cy='9.5' r='3.6' fill='%23D9547B'/%3E%3C/svg%3E"
     />
+    <!-- The faces the intro and hero show first: fetched alongside the scripts instead of after them -->
+    <link rel="preload" href="/src/assets/fonts/funnel-display-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/src/assets/fonts/funnel-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/src/assets/fonts/martian-mono-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/src/assets/fonts/doto-latin-full-normal.woff2" as="font" type="font/woff2" crossorigin />
     <script>
       // Every load starts at the top: no restored scroll position, and no #section jump from the URL.
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';

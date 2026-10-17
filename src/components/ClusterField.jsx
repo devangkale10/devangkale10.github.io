@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useReducedMotion } from '../lib/motion';
+import { introWillPlay, onIntroDone } from '../lib/intro';
 import './ClusterField.css';
 
 /*
@@ -451,8 +452,11 @@ export default function ClusterField({ focus = null }) {
       if (running) raf = requestAnimationFrame(draw);
     };
 
+    // Behind the intro the cloud waits, collapsed, so the burst and the clustering play where they can be seen.
+    let held = introWillPlay();
+    let visible = false;
     const start = () => {
-      if (running || reduced) return;
+      if (running || reduced || held) return;
       running = true;
       last = performance.now();
       raf = requestAnimationFrame(draw);
@@ -515,10 +519,23 @@ export default function ClusterField({ focus = null }) {
       if (!running) draw(performance.now());
     });
     ro.observe(wrap);
-    const io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? start() : stop()));
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) start();
+      else stop();
+    });
     io.observe(wrap);
+    const unhold = onIntroDone(() => {
+      if (!held) return;
+      held = false;
+      // Play the opening burst from the start now that it is on screen.
+      stageStart = performance.now();
+      doneAt = stageStart;
+      if (visible) start();
+    });
 
     return () => {
+      unhold();
       stop();
       ro.disconnect();
       io.disconnect();

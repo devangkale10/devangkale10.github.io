@@ -37,6 +37,20 @@ export function holdsSettled(maxMs) {
   return Promise.race([all, new Promise(r => setTimeout(r, maxMs))]);
 }
 
+/** Calls `fn` once the intro has finished (at once if it already has). Returns an unsubscribe. */
+export function onIntroDone(fn) {
+  if (done) {
+    fn();
+    return () => {};
+  }
+  const once = () => {
+    listeners.delete(once);
+    fn();
+  };
+  listeners.add(once);
+  return () => listeners.delete(once);
+}
+
 export function useIntroDone() {
   return useSyncExternalStore(
     fn => {
