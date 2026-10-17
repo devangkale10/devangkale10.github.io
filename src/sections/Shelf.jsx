@@ -584,7 +584,7 @@ export default function Shelf() {
               </button>
             </div>
             <p className="mono-label reader__hint">
-              <span className="hint--pointer">Drag or click a page to turn · drag beside the book to tilt it</span>
+              <span className="hint--pointer">Drag or click a page to turn</span>
               <span className="hint--touch">Swipe or tap a page to turn</span>
             </p>
 
