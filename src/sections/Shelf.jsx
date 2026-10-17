@@ -324,12 +324,14 @@ export default function Shelf() {
   }, [reduced]);
 
   // The first time the shelf is mostly in view: a short "swipe to browse" hint, and the shelf peeks
-  // towards the next volume and back. Shown once per visit; any touch, drag or wheel on it ends it.
+  // towards the next volume and back. Shown once per visit. Once it is showing, a sideways swipe or a click
+  // on the shelf ends it early. Scrolling the page down onto the shelf (wheel over it) must not cancel it.
   const [swipeHint, setSwipeHint] = useState(false);
   useEffect(() => {
     const stage = stageRef.current;
     if (mode !== 'ready' || reduced || !stage) return undefined;
     let shown = false;
+    let playing = false;
     let nudgeT = 0;
     let hideT = 0;
     let waitT = 0;
@@ -337,10 +339,17 @@ export default function Shelf() {
       clearTimeout(nudgeT);
       clearTimeout(hideT);
       clearTimeout(waitT);
-      shown = true;
+      playing = false;
       setSwipeHint(false);
     };
+    const onPointer = e => {
+      if (playing && e.pointerType !== 'touch') hide();
+    };
+    const onWheel = e => {
+      if (playing && Math.abs(e.deltaX) > Math.abs(e.deltaY)) hide();
+    };
     const play = () => {
+      playing = true;
       setSwipeHint(true);
       nudgeT = setTimeout(() => sceneRef.current?.nudge(), 450);
       hideT = setTimeout(hide, 3600);
@@ -363,15 +372,15 @@ export default function Shelf() {
       { threshold: 0.6 }
     );
     io.observe(stage);
-    stage.addEventListener('pointerdown', hide);
-    stage.addEventListener('wheel', hide, { passive: true });
+    stage.addEventListener('pointerdown', onPointer);
+    stage.addEventListener('wheel', onWheel, { passive: true });
     return () => {
       io.disconnect();
       clearTimeout(nudgeT);
       clearTimeout(hideT);
       clearTimeout(waitT);
-      stage.removeEventListener('pointerdown', hide);
-      stage.removeEventListener('wheel', hide);
+      stage.removeEventListener('pointerdown', onPointer);
+      stage.removeEventListener('wheel', onWheel);
     };
   }, [mode, reduced]);
 
