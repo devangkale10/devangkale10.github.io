@@ -291,13 +291,40 @@ export const GlobalSpotlight = ({
   disableAnimations = false,
   enabled = true,
   spotlightRadius = DEFAULT_SPOTLIGHT_RADIUS,
-  glowColor = DEFAULT_GLOW_COLOR
+  glowColor = DEFAULT_GLOW_COLOR,
+  // Cards only: no floating light over the section, and a card's border glows only while the pointer is on it.
+  cardsOnly = false
 }) => {
   const spotlightRef = useRef(null);
   const isInsideSection = useRef(false);
 
   useEffect(() => {
     if (disableAnimations || !sectionRef?.current || !enabled) return;
+
+    if (cardsOnly) {
+      const glowCards = (x, y) => {
+        sectionRef.current?.querySelectorAll(cardSelector).forEach(card => {
+          const r = card.getBoundingClientRect();
+          const over = x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+          updateCardGlowProperties(card, x, y, over ? 1 : 0, spotlightRadius);
+        });
+      };
+      let last = null;
+      const onMove = e => {
+        last = e;
+        glowCards(e.clientX, e.clientY);
+      };
+      const onScroll = () => last && glowCards(last.clientX, last.clientY);
+      const onLeave = () => glowCards(-1, -1);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseleave', onLeave);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      return () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseleave', onLeave);
+        window.removeEventListener('scroll', onScroll);
+      };
+    }
 
     const spotlight = document.createElement('div');
     spotlight.className = 'global-spotlight';
@@ -419,7 +446,7 @@ export const GlobalSpotlight = ({
       window.removeEventListener('scroll', handleScroll);
       spotlightRef.current?.parentNode?.removeChild(spotlightRef.current);
     };
-  }, [sectionRef, cardSelector, disableAnimations, enabled, spotlightRadius, glowColor]);
+  }, [sectionRef, cardSelector, disableAnimations, enabled, spotlightRadius, glowColor, cardsOnly]);
 
   return null;
 };

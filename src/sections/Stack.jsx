@@ -237,6 +237,7 @@ export default function Stack() {
               cardSelector=".skill-card"
               glowColor="232, 236, 239"
               spotlightRadius={320}
+              cardsOnly
               disableAnimations={reduced}
             />
             {layers.map(layer => (
