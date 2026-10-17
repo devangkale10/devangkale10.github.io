@@ -332,19 +332,33 @@ export default function Shelf() {
     let shown = false;
     let nudgeT = 0;
     let hideT = 0;
+    let waitT = 0;
     const hide = () => {
       clearTimeout(nudgeT);
       clearTimeout(hideT);
+      clearTimeout(waitT);
+      shown = true;
       setSwipeHint(false);
+    };
+    const play = () => {
+      setSwipeHint(true);
+      nudgeT = setTimeout(() => sceneRef.current?.nudge(), 450);
+      hideT = setTimeout(hide, 3600);
+    };
+    // Only once the books are actually drawn (the shader warm-up can finish a moment after 'ready'),
+    // and the shelf has faded in, so the peek is seen.
+    const whenDrawn = () => {
+      const scene = sceneRef.current;
+      if (!scene || scene.state !== 'shelf') return;
+      if (scene.compiled) waitT = setTimeout(play, 400);
+      else waitT = setTimeout(whenDrawn, 100);
     };
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (shown || !entry.isIntersecting || sceneRef.current?.state !== 'shelf') return;
+        if (shown || !entry.isIntersecting) return;
         shown = true;
         io.disconnect();
-        setSwipeHint(true);
-        nudgeT = setTimeout(() => sceneRef.current?.nudge(), 450);
-        hideT = setTimeout(hide, 3600);
+        whenDrawn();
       },
       { threshold: 0.6 }
     );
@@ -355,6 +369,7 @@ export default function Shelf() {
       io.disconnect();
       clearTimeout(nudgeT);
       clearTimeout(hideT);
+      clearTimeout(waitT);
       stage.removeEventListener('pointerdown', hide);
       stage.removeEventListener('wheel', hide);
     };

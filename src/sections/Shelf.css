@@ -92,12 +92,12 @@ html[data-reading='true'] {
   transition: opacity 0.6s ease;
 }
 
-/* One-time "swipe to browse" hint, under the plank: a dot glides right to left along a short track,
-   the way a finger moves to bring the next volume in. Fades in, plays a couple of times, fades out. */
+/* One-time "swipe to browse" hint, between the top line and the books: a dot glides right to left along
+   a short track, the way a finger moves to bring the next volume in. Fades in, plays, fades out. */
 .shelf__swipe {
   position: absolute;
   left: 50%;
-  top: 77%;
+  top: calc(var(--nav-h) + 76px);
   z-index: 2;
   display: inline-flex;
   align-items: center;
