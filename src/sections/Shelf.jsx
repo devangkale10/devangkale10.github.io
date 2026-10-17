@@ -4,7 +4,7 @@ import { profile, volumes } from '../data/resume';
 import { prefersReducedMotion, scrollToTarget, startScroll, stopScroll, useReducedMotion } from '../lib/motion';
 import { useReveal } from '../lib/useReveal';
 import { holdIntro, introWillPlay, useIntroDone } from '../lib/intro';
-import { LayerTag, RichText, SectionHead } from '../components/Bits';
+import { RichText, SectionHead } from '../components/Bits';
 import { ArrowLeft, ArrowUpRight, ChevronLeft, ChevronRight } from '../components/Icons';
 import { themeFor } from '../shelf/theme';
 import PiiDemo from './PiiDemo';
@@ -58,7 +58,6 @@ export function VolumeDetails({ vol, index, titleId, header = true }) {
             <span className="mono-label">
               Vol. {pad(index + 1)} / {pad(N)}
             </span>
-            <LayerTag id={vol.layer} />
           </p>
           <h3 className="vol__title" id={titleId}>
             {vol.title}
@@ -585,8 +584,8 @@ export default function Shelf() {
               </button>
             </div>
             <p className="mono-label reader__hint">
-              <span className="hint--pointer">Drag the pages to turn them · drag beside the book to tilt it</span>
-              <span className="hint--touch">Swipe the pages to turn them</span>
+              <span className="hint--pointer">Drag or click a page to turn · drag beside the book to tilt it</span>
+              <span className="hint--touch">Swipe or tap a page to turn</span>
             </p>
 
             <div className="reader__panel vol" key={vol.id} data-lenis-prevent>
