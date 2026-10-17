@@ -734,6 +734,18 @@ export class ShelfScene {
     this.select(this.index + 1);
   }
 
+  /** A short peek towards the next volume and back, to show the shelf can be swiped. Any drag cancels it. */
+  nudge() {
+    if (this.state !== 'shelf' || this.reduced || this.ptr) return;
+    const base = this.index;
+    const dir = base < this.N - 1 ? 1 : -1;
+    gsap.killTweensOf(this, 'offset');
+    gsap
+      .timeline({ onUpdate: () => this.invalidate() })
+      .to(this, { offset: base + 0.32 * dir, duration: 0.6, ease: 'power2.inOut' })
+      .to(this, { offset: base, duration: 0.9, ease: 'power3.out' }, '+=0.12');
+  }
+
   prev() {
     this.select(this.index - 1);
   }

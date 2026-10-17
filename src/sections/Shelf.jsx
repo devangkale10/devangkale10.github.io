@@ -323,6 +323,43 @@ export default function Shelf() {
     if (sceneRef.current) sceneRef.current.reduced = reduced;
   }, [reduced]);
 
+  // The first time the shelf is mostly in view: a short "swipe to browse" hint, and the shelf peeks
+  // towards the next volume and back. Shown once per visit; any touch, drag or wheel on it ends it.
+  const [swipeHint, setSwipeHint] = useState(false);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (mode !== 'ready' || reduced || !stage) return undefined;
+    let shown = false;
+    let nudgeT = 0;
+    let hideT = 0;
+    const hide = () => {
+      clearTimeout(nudgeT);
+      clearTimeout(hideT);
+      setSwipeHint(false);
+    };
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (shown || !entry.isIntersecting || sceneRef.current?.state !== 'shelf') return;
+        shown = true;
+        io.disconnect();
+        setSwipeHint(true);
+        nudgeT = setTimeout(() => sceneRef.current?.nudge(), 450);
+        hideT = setTimeout(hide, 3600);
+      },
+      { threshold: 0.6 }
+    );
+    io.observe(stage);
+    stage.addEventListener('pointerdown', hide);
+    stage.addEventListener('wheel', hide, { passive: true });
+    return () => {
+      io.disconnect();
+      clearTimeout(nudgeT);
+      clearTimeout(hideT);
+      stage.removeEventListener('pointerdown', hide);
+      stage.removeEventListener('wheel', hide);
+    };
+  }, [mode, reduced]);
+
   // Entering and leaving the reading view: focus, announcements, page scroll.
   // (With reduced motion a flight finishes at once, so 'toDetail' may never render.)
   useEffect(() => {
@@ -469,6 +506,10 @@ export default function Shelf() {
           <p className="shelf__loading mono-label" aria-hidden={ready}>
             <i aria-hidden="true" />
             Shelving the volumes
+          </p>
+          <p className="shelf__swipe mono-label" data-on={swipeHint && state === 'shelf'} aria-hidden="true">
+            <span className="shelf__swipe-track" />
+            Swipe to browse
           </p>
 
           <div className="shelf__chrome" inert={reading} onKeyDown={onShelfKey}>
