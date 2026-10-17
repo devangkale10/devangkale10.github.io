@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from '../lib/motion';
+import { holdIntro } from '../lib/intro';
 import './VantaField.css';
 
 /*
@@ -32,7 +33,7 @@ export default function VantaField() {
     let io = null;
     let cancelled = false;
 
-    (async () => {
+    const loading = (async () => {
       try {
         const THREE = await import('three');
         // Vanta's effect modules read window.THREE when they are evaluated.
@@ -52,6 +53,8 @@ export default function VantaField() {
           ...FOG_OPTIONS
         });
         if (fogRef.current.querySelector('canvas')) setReady(true);
+        // Let the first frames draw (that is when the shader compiles) before the intro may open.
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         // Vanta keeps its loop running even when it skips drawing; stop it outright while the hero is off screen.
         io = new IntersectionObserver(([entry]) => {
           if (!effect) return;
@@ -71,6 +74,7 @@ export default function VantaField() {
         console.warn('[hero] animated field unavailable:', err);
       }
     })();
+    holdIntro(loading);
 
     return () => {
       cancelled = true;

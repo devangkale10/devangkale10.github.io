@@ -5,15 +5,19 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { profile } from '../data/resume';
 import { startScroll, stopScroll } from '../lib/motion';
-import { finishIntro, introWillPlay } from '../lib/intro';
+import { finishIntro, holdsSettled, introWillPlay } from '../lib/intro';
 import './Intro.css';
 
-/** Resolves once the fonts are in and the page has loaded, or after a few seconds at most. */
+/**
+ * Resolves once the fonts are in, the page has loaded and the heavy sections (hero field, shelf)
+ * are built, or after a few seconds at most.
+ */
 function pageReady() {
   const fonts = document.fonts?.ready ?? Promise.resolve();
   const load =
     document.readyState === 'complete' ? Promise.resolve() : new Promise(r => window.addEventListener('load', r, { once: true }));
-  return Promise.race([Promise.all([fonts, load]), new Promise(r => setTimeout(r, 1500))]);
+  const basics = Promise.race([Promise.all([fonts, load]), new Promise(r => setTimeout(r, 1500))]);
+  return Promise.all([basics, holdsSettled(4000)]);
 }
 
 /*

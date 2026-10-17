@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { profile, volumes } from '../data/resume';
 import { prefersReducedMotion, scrollToTarget, startScroll, stopScroll, useReducedMotion } from '../lib/motion';
 import { useReveal } from '../lib/useReveal';
-import { useIntroDone } from '../lib/intro';
+import { holdIntro, introWillPlay, useIntroDone } from '../lib/intro';
 import { LayerTag, RichText, SectionHead } from '../components/Bits';
 import { ArrowLeft, ArrowUpRight, ChevronLeft, ChevronRight } from '../components/Icons';
 import { themeFor } from '../shelf/theme';
@@ -257,15 +257,16 @@ export default function Shelf() {
     }
   };
 
-  // Build the scene early: a moment after the intro opens onto the page (once the hero has had the main
-  // thread for its entrance), or as soon as the section is within a couple of screens, whichever is first.
-  // By the time anyone scrolls down to it, the shelf is standing.
+  // Build the scene early. While the intro plays, it is built behind it (and the intro waits for it), so
+  // nothing heavy is left to do once the page opens. Without the intro: a moment after load, or as soon as
+  // the section is within a couple of screens, whichever is first.
   const startRef = useRef(() => {});
   useEffect(() => {
     const section = sectionRef.current;
     let cancelled = false;
     let started = false;
     let scene = null;
+    let built = () => {};
     const start = () => {
       if (started || cancelled) return;
       started = true;
@@ -273,7 +274,7 @@ export default function Shelf() {
       setMode('loading');
       import('../shelf/ShelfScene.js').then(
         ({ ShelfScene }) => {
-          if (cancelled || !canvasRef.current) return;
+          if (cancelled || !canvasRef.current) return built();
           try {
             scene = new ShelfScene({
               canvas: canvasRef.current,
@@ -283,12 +284,13 @@ export default function Shelf() {
             });
           } catch {
             setMode('fallback');
-            return;
+            return built();
           }
           sceneRef.current = scene;
-          scene.init();
+          scene.init().then(built, built);
         },
         () => {
+          built();
           if (!cancelled) setMode('fallback');
         }
       );
@@ -296,8 +298,13 @@ export default function Shelf() {
     const io = new IntersectionObserver(([entry]) => entry.isIntersecting && start(), { rootMargin: '1600px 0px' });
     io.observe(section);
     startRef.current = start;
+    if (introWillPlay()) {
+      holdIntro(new Promise(r => (built = r)));
+      start();
+    }
     return () => {
       cancelled = true;
+      built();
       io.disconnect();
       scene?.dispose();
       sceneRef.current = null;
