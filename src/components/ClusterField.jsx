@@ -45,8 +45,9 @@ function makeBlobs(rand, n) {
   const centers = [];
   const spreads = [];
   for (let k = 0; k < K; k++) {
-    const a = base + (k * 2 * Math.PI) / K + (rand() - 0.5) * 0.7;
-    const r = 1.3 + rand() * 0.25;
+    // Kept apart: a wide ring, and only a little angular jitter so no two blobs crowd each other.
+    const a = base + (k * 2 * Math.PI) / K + (rand() - 0.5) * 0.45;
+    const r = 1.5 + rand() * 0.25;
     centers.push([Math.cos(a) * r, (rand() - 0.5) * 0.5, Math.sin(a) * r]);
     spreads.push([0.2 + rand() * 0.16, 0.15 + rand() * 0.1, 0.2 + rand() * 0.16]);
   }
@@ -61,9 +62,9 @@ function makeBlobs(rand, n) {
         y = rand() * 2 - 1;
         z = rand() * 2 - 1;
       } while (x * x + y * y + z * z > 1);
-      out[i * 3] = x * 1.75;
+      out[i * 3] = x * 1.95;
       out[i * 3 + 1] = y * 1.1;
-      out[i * 3 + 2] = z * 1.75;
+      out[i * 3 + 2] = z * 1.95;
     } else {
       const c = Math.floor(rand() * K);
       out[i * 3] = centers[c][0] + gauss(rand) * spreads[c][0];
