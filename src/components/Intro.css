@@ -1,0 +1,159 @@
+/* The opening intro: a veil with an aperture (--r) that opens onto the page, and a dot field (--g). */
+
+html.is-intro {
+  overflow: hidden;
+}
+
+/* The hero waits for the intro before playing its own entrance */
+html.is-intro [data-hero-in] {
+  animation-play-state: paused;
+}
+
+.intro {
+  --r: 0px;
+  --g: 0px;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+}
+
+.intro__veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 50% 50%, rgb(232 236 239 / 0.035), transparent 70%),
+    var(--bg);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--r) - 1px), #000 var(--r));
+  mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--r) - 1px), #000 var(--r));
+}
+
+/* The site's dot matrix, spreading out from the centre */
+.intro__grid {
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at center, rgb(232 236 239 / 0.16) 1px, transparent 1.7px) 50% 50% / 18px 18px;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--g) * 0.35), rgb(0 0 0 / 0.35) calc(var(--g) * 0.7), transparent var(--g));
+  mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--g) * 0.35), rgb(0 0 0 / 0.35) calc(var(--g) * 0.7), transparent var(--g));
+}
+
+.intro__core {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  text-align: center;
+}
+
+.intro__mark {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 6px;
+}
+
+.intro__mark i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+}
+
+.intro__seed {
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  background: var(--fg);
+  box-shadow: 0 0 24px rgb(232 236 239 / 0.6);
+}
+
+.intro__dot {
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  background: var(--c-glow);
+  box-shadow:
+    0 0 0 4px rgb(var(--c-rgb) / 0.16),
+    0 0 26px rgb(var(--c-rgb) / 0.7);
+  opacity: 0;
+}
+
+.intro__flash {
+  width: 120px;
+  height: 120px;
+  margin: -60px 0 0 -60px;
+  background: radial-gradient(circle, rgb(255 255 255 / 0.95), rgb(232 236 239 / 0.35) 30%, transparent 68%);
+  opacity: 0;
+  transform: scale(0.2);
+}
+
+.intro__name {
+  display: flex;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--fg);
+}
+
+.intro__name span {
+  display: inline-block;
+}
+
+.intro__count {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  min-width: 4ch;
+  justify-content: center;
+  margin-top: -6px;
+  color: var(--fg-3);
+}
+
+.intro__count b {
+  font-family: var(--font-dots);
+  font-weight: 700;
+  font-size: 1.1rem;
+  font-variation-settings: 'ROND' 100;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
+}
+
+.intro__note {
+  margin-top: -14px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  font-stretch: 92%;
+  letter-spacing: 0.08em;
+  color: var(--fg-3);
+  min-height: 1.5em;
+}
+
+/* The dot-matrix face has no clear percent sign, so it is set in the display face */
+.intro__count span {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+/* A thin bright rim riding the edge of the aperture */
+.intro__ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px rgb(232 236 239 / 0.55),
+    0 0 40px 2px rgb(232 236 239 / 0.18);
+  opacity: 0;
+}

@@ -1,0 +1,263 @@
+.experience__grid {
+  display: grid;
+  gap: 48px;
+}
+
+/* ---------- timeline index (wide screens) ---------- */
+
+.timeline {
+  display: none;
+}
+
+@media (min-width: 1000px) {
+  .experience__grid {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 64px;
+  }
+
+  .timeline {
+    display: block;
+    position: sticky;
+    top: calc(var(--nav-h) + 10vh);
+    align-self: start;
+    padding-left: 28px;
+  }
+}
+
+.timeline__track {
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--line-2);
+}
+
+.timeline__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--fg-2);
+  transform-origin: top;
+  transform: scaleY(0);
+}
+
+.timeline ol {
+  display: grid;
+  gap: 6px;
+}
+
+.timeline a {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  margin-left: -14px;
+  border-radius: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.timeline a:hover {
+  background: color-mix(in oklab, var(--fg) 4%, transparent);
+}
+
+.timeline__dot {
+  position: absolute;
+  left: -24px;
+  top: 17px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--fg-3);
+  background: var(--bg);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.4s var(--ease-out);
+}
+
+.timeline li[data-active='true'] .timeline__dot {
+  background: var(--fg);
+  border-color: var(--fg);
+  transform: scale(1.25);
+}
+
+.timeline__org {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1875rem;
+  letter-spacing: -0.015em;
+  color: var(--fg-3);
+  transition: color 0.3s ease;
+}
+
+.timeline__title {
+  font-size: 0.875rem;
+  color: var(--fg-3);
+}
+
+.timeline li[data-active='true'] .timeline__org {
+  color: var(--fg);
+}
+
+.timeline li[data-active='true'] .timeline__title {
+  color: var(--fg-2);
+}
+
+/* ---------- roles ---------- */
+
+.roles {
+  display: grid;
+}
+
+.role {
+  display: grid;
+  gap: 28px;
+  padding-block: 0 64px;
+}
+
+.role + .role {
+  padding-top: 64px;
+  border-top: 1px solid var(--line);
+}
+
+.role:last-child {
+  padding-bottom: 0;
+}
+
+.role__head {
+  display: grid;
+  gap: 12px;
+}
+
+.role__when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  color: var(--fg-2);
+}
+
+.role__title {
+  font-size: clamp(1.9rem, 3.4vw, 2.9rem);
+  letter-spacing: -0.035em;
+}
+
+.role__org {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  font-size: 1.0625rem;
+  color: var(--fg);
+}
+
+.role__unit {
+  color: var(--fg-3);
+}
+
+/* When the office is the employer, the whole name is one link (inline, so it wraps like text) */
+.role__org-link {
+  display: inline;
+  background-position: 0 92%;
+}
+
+.role__org-link .role__unit {
+  margin-left: 0.6em;
+}
+
+.role__org-link svg {
+  display: inline-block;
+  margin-left: 0.35em;
+  vertical-align: -0.1em;
+}
+
+.role__org-link:hover .role__unit {
+  color: var(--fg-2);
+}
+
+.role__bullets {
+  display: grid;
+  gap: 22px;
+}
+
+/* Bullet text on the left, the tools it names as a short note on the right */
+.role__bullet {
+  display: grid;
+  gap: 10px;
+}
+
+@media (min-width: 760px) {
+  .role__bullet {
+    grid-template-columns: minmax(0, 1fr) 168px;
+    gap: 32px;
+    align-items: start;
+  }
+}
+
+.role__text {
+  position: relative;
+  padding-left: 22px;
+  max-width: 66ch;
+  color: var(--fg-2);
+  line-height: 1.62;
+}
+
+.role__text::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.7em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-3);
+}
+
+.role__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 22px;
+}
+
+@media (min-width: 760px) {
+  .role__skills {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 4px 0 0 16px;
+    border-left: 1px solid var(--line-2);
+  }
+}
+
+.role__skill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-stretch: 92%;
+  line-height: 1.35;
+  color: var(--fg-2);
+}
+
+.role__skill::before {
+  content: '';
+  flex: none;
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: var(--fg-3);
+  transform: rotate(45deg);
+}
+
+@media (max-width: 759px) {
+  .role__skill {
+    padding: 5px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+  }
+  .role__skill::before {
+    display: none;
+  }
+}

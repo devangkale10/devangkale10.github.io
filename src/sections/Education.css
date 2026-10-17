@@ -1,0 +1,65 @@
+.edu {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+
+.edu__item {
+  display: grid;
+  gap: 10px 32px;
+  padding-block: 32px;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 860px) {
+  .edu__item {
+    grid-template-columns: minmax(170px, 2fr) minmax(0, 7fr) minmax(140px, 2fr);
+    align-items: baseline;
+    padding-block: 40px;
+  }
+}
+
+.edu__when {
+  color: var(--fg-2);
+}
+
+.edu__main {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.edu__degree {
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+  letter-spacing: -0.03em;
+}
+
+.edu__school {
+  color: var(--fg-2);
+}
+
+.edu__gpa {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+@media (min-width: 860px) {
+  .edu__gpa {
+    justify-content: flex-end;
+  }
+}
+
+.edu__gpa-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2.25rem;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--fg);
+}
+
+.edu__gpa-scale {
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--fg-3);
+}

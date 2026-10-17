@@ -1,0 +1,296 @@
+.contact {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-top: var(--section-y);
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: var(--bg-2);
+}
+
+.contact__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  -webkit-mask-image: radial-gradient(120% 90% at 85% 40%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(120% 90% at 85% 40%, #000 20%, transparent 75%);
+}
+
+.contact__dots-static {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at center, #1f2935 1.5px, transparent 2px);
+  background-size: 24px 24px;
+}
+
+.contact__inner {
+  position: relative;
+  display: grid;
+  gap: 28px;
+}
+
+.contact__title {
+  font-size: clamp(3rem, 9vw, 8.5rem);
+  text-wrap: balance;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  margin-left: -0.04em;
+}
+
+.contact__email-row {
+  display: grid;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+@media (min-width: 900px) {
+  .contact__email-row {
+    grid-template-columns: minmax(0, auto) auto;
+    justify-content: start;
+    align-items: center;
+    gap: 32px;
+  }
+}
+
+.contact__email {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  width: fit-content;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.35rem, 3.4vw, 2.6rem);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.5s var(--ease-out);
+}
+
+.contact__email:hover {
+  background-size: 100% 2px;
+}
+
+.contact__email-arrow {
+  flex: none;
+  width: 0.62em;
+  height: 0.62em;
+  color: var(--fg-3);
+  transition:
+    transform 0.4s var(--ease-out),
+    color 0.25s ease;
+}
+
+.contact__email:hover .contact__email-arrow {
+  transform: translate(3px, -3px);
+  color: var(--fg);
+}
+
+.contact__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.contact__list {
+  display: grid;
+  margin-top: clamp(32px, 5vw, 64px);
+  border-top: 1px solid var(--line-2);
+  max-width: 880px;
+}
+
+@media (min-width: 720px) {
+  .contact__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+}
+
+.contact__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 6px;
+  align-items: center;
+  padding-block: 20px;
+  border-bottom: 1px solid var(--line-2);
+}
+
+/* The label row holds the icon and the label; the icon spans both rows */
+.contact__dt {
+  display: contents;
+}
+
+.contact__item .mono-label,
+.contact__item dd {
+  grid-column: 2;
+}
+
+/* A small tile with the channel's icon, spanning the label and the value */
+.contact__icon {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid var(--line-2);
+  background: color-mix(in oklab, var(--fg) 4%, transparent);
+  color: var(--fg-2);
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    transform 0.4s var(--ease-out);
+}
+
+.contact__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.contact__item:hover .contact__icon {
+  color: var(--fg);
+  border-color: var(--fg-3);
+  background: color-mix(in oklab, var(--fg) 8%, transparent);
+  transform: translateY(-2px);
+}
+
+.contact__item dd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 1.125rem;
+  min-width: 0;
+}
+
+.contact__value {
+  user-select: all;
+}
+
+.contact__copy {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  color: var(--fg-2);
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.contact__copy:hover {
+  color: var(--fg);
+  border-color: var(--fg-3);
+}
+
+.contact__copy svg {
+  width: 16px;
+  height: 16px;
+}
+
+.contact__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  color: var(--fg);
+}
+
+.contact__link span {
+  overflow-wrap: anywhere;
+}
+
+.contact__link svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--fg-3);
+  transition:
+    transform 0.35s var(--ease-out),
+    color 0.25s ease;
+}
+
+.contact__link:hover svg {
+  transform: translate(3px, -3px);
+  color: var(--fg);
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-top: clamp(80px, 10vw, 144px);
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 0.875rem;
+  color: var(--fg-3);
+}
+
+.footer__made {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.footer__heart {
+  width: 15px;
+  height: 15px;
+  color: var(--act-glow);
+  transition: transform 0.4s var(--ease-out);
+}
+
+.footer__made:hover .footer__heart {
+  animation: heart-beat 0.9s ease-in-out infinite;
+}
+
+@keyframes heart-beat {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.25); }
+  55% { transform: scale(0.95); }
+}
+
+.footer__year {
+  margin-left: 10px;
+  color: var(--fg-3);
+}
+
+.footer__top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-2);
+  border-radius: 6px;
+}
+
+.footer__top:hover {
+  color: var(--fg);
+}
+
+.footer__top svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.footer__top:hover svg {
+  transform: translateY(-3px);
+}

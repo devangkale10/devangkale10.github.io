@@ -1,0 +1,106 @@
+@property --lens {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+.field {
+  --pitch: 12px;
+  --dot: 1.7px;
+  --dot-big: 3.2px;
+  --lens: 0px;
+  --mx: 70%;
+  --my: 40%;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: --lens 0.7s var(--ease-out);
+}
+
+.field[data-lens='on'] {
+  --lens: 230px;
+}
+
+/* Every position on the grid, unlit */
+.field__unlit {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at center, rgb(232 236 239 / 0.07) var(--dot), transparent calc(var(--dot) + 0.6px));
+  background-size: var(--pitch) var(--pitch);
+  background-position: 0 0;
+}
+
+/*
+ * The lit layer. Mask = (big dots ∩ lens) ∪ small dots.
+ * Layers composite bottom-up: small dots, then the lens is added, then big dots intersect.
+ * Small dots sit inside big dots on the same grid, so they survive the intersection.
+ */
+.field__lit {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(55% 65% at 80% 28%, rgb(108 198 240 / 0.55), transparent 70%),
+    radial-gradient(45% 55% at 62% 78%, rgb(224 106 146 / 0.5), transparent 70%),
+    radial-gradient(38% 48% at 96% 88%, rgb(232 169 76 / 0.45), transparent 70%);
+  -webkit-mask-image:
+    radial-gradient(circle at center, #000 var(--dot-big), transparent calc(var(--dot-big) + 0.6px)),
+    radial-gradient(var(--lens) circle at var(--mx) var(--my), #000 0%, rgb(0 0 0 / 0.55) 45%, transparent 100%),
+    radial-gradient(circle at center, #000 var(--dot), transparent calc(var(--dot) + 0.6px));
+  mask-image:
+    radial-gradient(circle at center, #000 var(--dot-big), transparent calc(var(--dot-big) + 0.6px)),
+    radial-gradient(var(--lens) circle at var(--mx) var(--my), #000 0%, rgb(0 0 0 / 0.55) 45%, transparent 100%),
+    radial-gradient(circle at center, #000 var(--dot), transparent calc(var(--dot) + 0.6px));
+  -webkit-mask-size:
+    var(--pitch) var(--pitch),
+    100% 100%,
+    var(--pitch) var(--pitch);
+  mask-size:
+    var(--pitch) var(--pitch),
+    100% 100%,
+    var(--pitch) var(--pitch);
+  -webkit-mask-repeat: repeat, no-repeat, repeat;
+  mask-repeat: repeat, no-repeat, repeat;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  -webkit-mask-composite: source-in, source-over;
+  mask-composite: intersect, add;
+}
+
+.field__lit {
+  filter: saturate(1.2) brightness(1.18);
+}
+
+.field__lit canvas {
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.field[data-ready='true'] .field__lit {
+  filter: saturate(1.2) brightness(1.18);
+}
+
+.field__lit canvas {
+  opacity: 1;
+}
+
+/* Keep the type legible: darken behind the text column and fade into the page below */
+.field__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, var(--bg) 0%, rgb(10 14 19 / 0) 34%),
+    linear-gradient(100deg, rgb(10 14 19 / 0.82) 0%, rgb(10 14 19 / 0.5) 38%, rgb(10 14 19 / 0) 66%);
+}
+
+@media (max-width: 720px) {
+  .field {
+    --pitch: 10px;
+    --dot: 1.3px;
+  }
+  .field__shade {
+    background:
+      linear-gradient(to top, var(--bg) 0%, rgb(10 14 19 / 0.55) 46%, rgb(10 14 19 / 0) 78%),
+      linear-gradient(100deg, rgb(10 14 19 / 0.5) 0%, rgb(10 14 19 / 0) 70%);
+  }
+}

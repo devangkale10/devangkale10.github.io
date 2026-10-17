@@ -1,0 +1,262 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: clamp(600px, 100svh, 1000px);
+  padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 56px);
+  padding-bottom: clamp(48px, 9vh, 104px);
+  overflow: hidden;
+}
+
+/* ---------- the interactive cloud ---------- */
+
+.hero__viz {
+  position: absolute;
+  z-index: 0;
+  top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 4px);
+  left: var(--pad-l);
+  right: var(--pad-r);
+  height: 40%;
+}
+
+@media (min-width: 960px) {
+  .hero__viz {
+    left: auto;
+    /* right edge lines up with the content column */
+    right: calc(var(--pad-r) + max(0px, (100% - var(--maxw) - var(--pad-l) - var(--pad-r)) / 2));
+    width: min(66%, 920px);
+    height: auto;
+    bottom: var(--viz-bottom, 300px);
+  }
+}
+
+/* ---------- text ---------- */
+
+/* The text layer sits above the cloud but lets the pointer through to it between words */
+.hero__inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(18px, 2.6vh, 28px);
+  pointer-events: none;
+}
+
+.hero__name,
+.hero__role,
+.hero__tagline,
+.hero__actions > *,
+.hero__now {
+  pointer-events: auto;
+}
+
+/* "Hi, I'm" sits small above the first name, so the two read as one line */
+.hero__hello {
+  display: block;
+  margin: 0 0 0.12em 0.06em;
+  font-size: clamp(1.4rem, 3vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--fg-2);
+}
+
+.hero__name {
+  width: fit-content;
+  font-size: var(--fs-name);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  margin-left: -0.04em;
+  text-wrap: balance;
+}
+
+/* SplitText clips its box; pad it so descenders and the rising letters are not cut */
+.hero__name-text {
+  padding-block: 0.06em 0.14em;
+  margin-block: -0.06em -0.14em;
+  padding-right: 0.06em;
+}
+
+.hero__role {
+  width: fit-content;
+  margin-top: calc(-0.6 * clamp(18px, 2.6vh, 28px));
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 3.5vw, 3.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--fg-2);
+}
+
+.hero__row {
+  display: grid;
+  gap: 28px;
+  align-items: end;
+  margin-top: clamp(6px, 1.6vh, 18px);
+  pointer-events: none;
+}
+
+@media (min-width: 960px) {
+  .hero__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 48px;
+  }
+}
+
+.hero__lead {
+  display: grid;
+  gap: 26px;
+  min-width: 0;
+}
+
+.hero__tagline {
+  width: fit-content;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.2rem, 1.75vw, 1.6rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--fg);
+}
+
+.hero__tagline-lead {
+  color: var(--fg-2);
+}
+
+.hero__rotator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-left: 0.3em;
+  vertical-align: bottom;
+  max-width: 100%;
+}
+
+.hero__rotator .layer-dot {
+  width: 0.36em;
+  height: 0.36em;
+  transition:
+    background-color 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+.hero__rotating {
+  color: var(--fg);
+}
+
+.hero__rotating-word {
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+@media (max-width: 600px) {
+  .hero__tagline-lead {
+    display: block;
+  }
+  .hero__rotator {
+    margin-left: 0;
+  }
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+}
+
+.hero__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  font-size: 0.9375rem;
+  color: var(--fg-2);
+}
+
+.hero__links a:hover {
+  color: var(--fg);
+}
+
+.hero__now {
+  justify-self: start;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  color: var(--fg-2);
+}
+
+.hero__now strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.hero__now-sub {
+  display: block;
+  color: var(--fg-3);
+  font-size: 0.875rem;
+}
+
+.hero__now-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pulse {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg);
+}
+.pulse::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--fg);
+  animation: pulse 2.4s var(--ease-out) infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+/* Entrance: everything settles within ~1.3s of load, without waiting on scroll */
+@media (prefers-reduced-motion: no-preference) {
+  [data-hero-in] {
+    animation: heroIn 1s var(--ease-out) both;
+    animation-delay: calc(500ms + var(--i, 0) * 110ms);
+  }
+}
+
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

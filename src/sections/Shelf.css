@@ -1,0 +1,753 @@
+/*
+ * Selected work: a full-height stage with the WebGL shelf, the shelf's controls laid over it,
+ * and a reading view (the book in a slot on the left, the details in a panel on the right;
+ * on phones the panel is a sheet along the bottom).
+ */
+
+.work {
+  padding-bottom: 0;
+}
+
+.work .section-head {
+  margin-bottom: clamp(36px, 5vw, 64px);
+}
+
+/* While reading, the page behind the stage (and any scrollbar gutter) takes the book's colour */
+html[data-reading='true'] {
+  background: var(--reading-bg, var(--bg));
+}
+
+/* ---------- stage ---------- */
+
+.shelf {
+  --panel-w: clamp(340px, 34vw, 470px);
+  --shelf-bg: #0b0e12;
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--shelf-bg);
+  border-top: 1px solid var(--line);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* a sideways trackpad swipe moves the shelf, not the browser's history */
+  overscroll-behavior-x: none;
+  transition: background-color 0.9s ease;
+}
+
+.shelf[data-state='toDetail'],
+.shelf[data-state='detail'] {
+  background: var(--vol-tint);
+}
+
+.shelf__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  touch-action: pan-y;
+}
+
+.shelf[data-mode='ready'] .shelf__canvas {
+  opacity: 1;
+}
+
+.shelf__canvas[data-state='toDetail'],
+.shelf__canvas[data-state='detail'],
+.shelf__canvas[data-state='toShelf'] {
+  touch-action: none;
+}
+
+/* Darkens the top and bottom edges so the controls read over the scene */
+.shelf__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgb(11 14 18 / 0.7), transparent 24%),
+    linear-gradient(to top, rgb(11 14 18 / 0.92), rgb(11 14 18 / 0.5) 22%, transparent 42%);
+  transition: opacity 0.7s ease;
+}
+
+.shelf[data-state='toDetail'] .shelf__shade,
+.shelf[data-state='detail'] .shelf__shade,
+.shelf[data-state='toShelf'] .shelf__shade {
+  opacity: 0;
+}
+
+.shelf__loading {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transform: translate(-50%, -50%);
+  color: var(--fg-2);
+  transition: opacity 0.6s ease;
+}
+
+.shelf__loading i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--explain-glow);
+  animation: shelf-pulse 1.2s ease-in-out infinite;
+}
+
+.shelf[data-mode='ready'] .shelf__loading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes shelf-pulse {
+  50% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+}
+
+/* ---------- shelf controls ---------- */
+
+.shelf__chrome {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(var(--nav-h) + 18px) var(--pad-r) clamp(18px, 3.2vh, 34px) var(--pad-l);
+  pointer-events: none;
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s var(--ease-out);
+}
+
+.shelf__chrome button,
+.shelf__chrome a {
+  pointer-events: auto;
+}
+
+.shelf[data-state='toDetail'] .shelf__chrome,
+.shelf[data-state='detail'] .shelf__chrome,
+.shelf[data-state='toShelf'] .shelf__chrome {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.shelf[data-state='shelf'] .shelf__chrome {
+  transition-delay: 0.1s;
+}
+
+.shelf__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.shelf__count {
+  color: var(--fg-3);
+}
+
+.shelf__count-now {
+  color: var(--fg);
+}
+
+.shelf__binding {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  text-align: right;
+}
+
+.shelf__binding .swatch:last-of-type {
+  margin-right: 6px;
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+  vertical-align: -1px;
+}
+
+.shelf__bar {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  text-align: center;
+}
+
+.shelf__now {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  max-width: 40ch;
+}
+
+.shelf__title {
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+  letter-spacing: -0.03em;
+}
+
+.shelf__sub {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  line-height: 1.45;
+}
+
+.shelf__controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  color: var(--fg);
+  background: rgb(11 14 18 / 0.35);
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.icon-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+.icon-btn:hover {
+  border-color: var(--fg-3);
+  background: color-mix(in oklab, var(--fg) 8%, transparent);
+}
+
+.icon-btn[aria-disabled='true'] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.icon-btn[aria-disabled='true']:hover {
+  border-color: var(--line-2);
+  background: rgb(11 14 18 / 0.35);
+}
+
+.shelf__open {
+  min-width: 150px;
+}
+
+.shelf__open:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.shelf__index {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.shelf__markers {
+  display: flex;
+  align-items: center;
+}
+
+.shelf__markers button {
+  display: block;
+  padding: 12px 4px;
+  border-radius: 4px;
+}
+
+.shelf__markers button::before {
+  content: '';
+  display: block;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line-2);
+  transition:
+    width 0.45s var(--ease-out),
+    background-color 0.3s ease;
+}
+
+.shelf__markers button:hover::before {
+  background: var(--fg-3);
+}
+
+.shelf__markers button[aria-current='true']::before {
+  width: 32px;
+  background: var(--fg);
+}
+
+.shelf__hint {
+  color: var(--fg-3);
+}
+
+.hint--touch {
+  display: none;
+}
+
+@media (hover: none) {
+  .hint--touch {
+    display: inline;
+  }
+  .hint--pointer {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .shelf__bar {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: end;
+    justify-items: stretch;
+    text-align: left;
+    gap: 32px;
+  }
+
+  .shelf__now {
+    justify-items: start;
+  }
+
+  .shelf__controls {
+    justify-content: center;
+  }
+
+  .shelf__index {
+    justify-items: end;
+  }
+}
+
+@media (max-width: 899px) {
+  .shelf__top .shelf__binding {
+    display: none;
+  }
+  .shelf__top {
+    justify-content: center;
+  }
+  .shelf__sub {
+    display: none;
+  }
+}
+
+/* ---------- reading view ---------- */
+
+.reader {
+  --pager-h: 64px;
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+  outline: none;
+  transition: visibility 0s linear 0.6s;
+}
+
+.reader[data-open='true'] {
+  visibility: visible;
+  transition: none;
+}
+
+.reader__back,
+.reader__pager,
+.reader__hint,
+.reader__panel {
+  pointer-events: auto;
+}
+
+.reader__slot {
+  position: absolute;
+  top: 88px;
+  bottom: 128px;
+  left: var(--pad-l);
+  right: calc(var(--pad-r) + var(--panel-w) + 36px);
+  pointer-events: none;
+}
+
+.reader__back {
+  position: absolute;
+  top: 22px;
+  left: var(--pad-l);
+  min-height: 42px;
+  padding: 0 16px 0 14px;
+  background: rgb(0 0 0 / 0.22);
+  border-color: rgb(255 255 255 / 0.16);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.35s ease,
+    transform 0.5s var(--ease-out),
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.reader__kbd {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 3px 6px;
+  border-radius: 5px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  color: var(--fg-3);
+}
+
+.reader__pager {
+  position: absolute;
+  bottom: 54px;
+  left: var(--pad-l);
+  right: calc(var(--pad-r) + var(--panel-w) + 36px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.35s ease,
+    transform 0.5s var(--ease-out);
+}
+
+.reader__pager .icon-btn {
+  background: rgb(0 0 0 / 0.22);
+  border-color: rgb(255 255 255 / 0.16);
+}
+
+.reader__pager .icon-btn[aria-disabled='true']:hover {
+  background: rgb(0 0 0 / 0.22);
+  border-color: rgb(255 255 255 / 0.16);
+}
+
+.reader__where {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 150px;
+}
+
+.reader__page {
+  color: var(--fg);
+}
+
+.reader__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.reader__dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.25);
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.reader__dots i[data-on='true'] {
+  background: var(--vol-accent);
+  transform: scale(1.3);
+}
+
+.reader__hint {
+  position: absolute;
+  bottom: 22px;
+  left: var(--pad-l);
+  right: calc(var(--pad-r) + var(--panel-w) + 36px);
+  text-align: center;
+  color: rgb(232 236 239 / 0.5);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.reader__panel {
+  position: absolute;
+  top: 18px;
+  right: var(--pad-r);
+  bottom: 18px;
+  width: var(--panel-w);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 30px 28px 34px;
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--vol-panel) 94%, transparent);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: 0 40px 90px -40px rgb(0 0 0 / 0.7);
+  -webkit-user-select: text;
+  user-select: text;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+  transform: translateX(calc(100% + var(--pad-r) + 24px));
+  transition: transform 0.75s var(--ease-in-out);
+}
+
+.reader[data-open='true'] .reader__back,
+.reader[data-open='true'] .reader__pager {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.45s;
+}
+
+.reader[data-open='true'] .reader__hint {
+  opacity: 1;
+  transition-delay: 0.8s;
+}
+
+.reader[data-open='true'] .reader__panel {
+  transform: none;
+  transition: transform 0.9s var(--ease-out) 0.2s;
+}
+
+@media (max-width: 899px) {
+  .shelf {
+    --sheet-h: 42%;
+  }
+
+  .reader__back {
+    top: 14px;
+    left: 14px;
+    min-height: 40px;
+    font-size: 0.875rem;
+  }
+
+  .reader__kbd,
+  .reader__hint {
+    display: none;
+  }
+
+  .reader__slot {
+    top: 62px;
+    left: 12px;
+    right: 12px;
+    bottom: calc(var(--sheet-h) + 66px);
+  }
+
+  .reader__pager {
+    left: 0;
+    right: 0;
+    bottom: calc(var(--sheet-h) + 12px);
+    gap: 12px;
+  }
+
+  .reader__pager .icon-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .reader__panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: var(--sheet-h);
+    padding: 24px 20px 28px;
+    border-radius: 20px 20px 0 0;
+    border-width: 1px 0 0;
+    transform: translateY(105%);
+  }
+}
+
+/* ---------- volume details (panel and fallback list) ---------- */
+
+.vol {
+  --c: var(--vol-accent, var(--fg-3));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vol__kicker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.vol__kicker .mono-label {
+  color: var(--vol-accent, var(--fg-2));
+}
+
+.vol__title {
+  font-size: clamp(1.75rem, 2.6vw, 2.4rem);
+  letter-spacing: -0.035em;
+  margin-top: -4px;
+}
+
+.vol__subtitle {
+  color: var(--fg-2);
+  line-height: 1.5;
+  margin-top: -6px;
+}
+
+.vol-metric {
+  display: grid;
+  gap: 4px;
+  padding: 16px 0;
+  border-block: 1px solid rgb(255 255 255 / 0.09);
+}
+
+.vol-metric__value {
+  font-family: var(--font-dots);
+  font-weight: 800;
+  font-variation-settings: 'ROND' 100;
+  font-size: clamp(2.6rem, 4vw, 3.4rem);
+  line-height: 1;
+  color: var(--fg);
+}
+
+.vol-metric__suffix {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.5em;
+  margin-left: 0.06em;
+  vertical-align: 0.8em;
+}
+
+.vol-metric__unit {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.42em;
+  margin-left: 0.3em;
+  letter-spacing: -0.01em;
+}
+
+.vol-metric__label {
+  color: var(--fg-2);
+}
+
+.vol-metric__note {
+  color: var(--fg-3);
+}
+
+.vol__text {
+  display: grid;
+  gap: 12px;
+  color: var(--fg-2);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.vol__text .fig {
+  white-space: normal;
+  background-image: linear-gradient(transparent 62%, color-mix(in oklab, var(--vol-accent, var(--fg-3)) 32%, transparent) 62%);
+}
+
+.vol__block {
+  display: grid;
+  gap: 10px;
+}
+
+.vol__tools li {
+  font-size: 0.8125rem;
+  padding: 7px 11px;
+  border-color: rgb(255 255 255 / 0.14);
+}
+
+.vol__meta {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid rgb(255 255 255 / 0.09);
+}
+
+.vol__meta > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.vol__meta dd {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+.vol__meta .swatch {
+  margin-right: 6px;
+}
+
+.vol__demo {
+  border: 1px solid rgb(255 255 255 / 0.09);
+  border-radius: 14px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, rgb(232 236 239 / 0.05) 1px, transparent 1.6px) 0 0 / 14px 14px,
+    rgb(0 0 0 / 0.18);
+}
+
+.vol__link {
+  align-self: flex-start;
+}
+
+/* ---------- fallback list (no WebGL) ---------- */
+
+.shelf-list {
+  display: grid;
+  gap: 12px;
+  padding-bottom: var(--section-y);
+}
+
+.shelf-list__item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.shelf-list__item summary {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 18px 22px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.shelf-list__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.shelf-list__spine {
+  width: 10px;
+  height: 28px;
+  align-self: center;
+  border-radius: 3px;
+  background: var(--cloth);
+  box-shadow: inset -3px 0 0 var(--foil);
+}
+
+.shelf-list__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.shelf-list__sub {
+  grid-column: 3;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.shelf-list__body {
+  padding: 4px 22px 26px;
+}

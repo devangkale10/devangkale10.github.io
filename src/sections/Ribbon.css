@@ -1,0 +1,43 @@
+.ribbon-wrap {
+  padding-top: clamp(28px, 3.5vw, 44px);
+  border-block: 1px solid var(--line);
+}
+
+.ribbon__label {
+  margin-bottom: clamp(4px, 1vw, 12px);
+}
+
+.ribbon {
+  padding-block: 0 clamp(36px, 5vw, 64px);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.ribbon__row {
+  position: relative;
+  overflow: hidden;
+}
+
+.ribbon__scroller {
+  display: flex;
+  white-space: nowrap;
+}
+
+.ribbon__text {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.25rem, 6.2vw, 5.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+.ribbon__row:first-child .ribbon__text {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--fg) 30%, transparent);
+}
+
+.ribbon__row:last-child .ribbon__text {
+  color: color-mix(in oklab, var(--fg) 16%, transparent);
+}

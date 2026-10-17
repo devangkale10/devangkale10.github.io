@@ -1,0 +1,214 @@
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  padding-top: env(safe-area-inset-top, 0px);
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    transform 0.6s var(--ease-out);
+  border-bottom: 1px solid transparent;
+}
+
+/* Out of the way while a book from the shelf is being read */
+html[data-reading='true'] .nav {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.nav[data-scrolled='true'] {
+  background: color-mix(in oklab, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-bottom-color: var(--line);
+}
+
+.nav[data-open='true'] {
+  background: var(--bg);
+  /* backdrop-filter would make the header the containing block of the fixed menu */
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.nav__bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: var(--nav-h);
+}
+
+.nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  margin-right: auto;
+  border-radius: 8px;
+}
+
+/* Monogram: D/K. The slash picks up a colour on hover. */
+.nav__mono {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.375rem;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.nav__mono i {
+  display: inline-block;
+  margin: 0 0.06em;
+  font-style: normal;
+  font-weight: 500;
+  color: var(--fg-3);
+  transition:
+    color 0.35s ease,
+    transform 0.5s var(--ease-out);
+}
+.nav__brand:hover .nav__mono i,
+.nav__brand:focus-visible .nav__mono i {
+  color: var(--act-glow);
+  transform: rotate(14deg);
+}
+
+.nav__links {
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav__links a {
+  position: relative;
+  padding: 8px 12px;
+  font-size: 0.9375rem;
+  color: var(--fg-2);
+  border-radius: 999px;
+  transition: color 0.25s ease;
+}
+.nav__links a:hover {
+  color: var(--fg);
+}
+.nav__links a[aria-current] {
+  color: var(--fg);
+}
+.nav__links a::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--fg);
+  transform: scale(0);
+  transition: transform 0.35s var(--ease-out);
+}
+.nav__links a[aria-current]::after {
+  transform: scale(1);
+}
+
+.nav__cta {
+  display: none;
+  min-height: 40px;
+  padding: 0 18px;
+}
+
+.nav__menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.nav__menu-icon {
+  display: grid;
+  gap: 4px;
+  width: 14px;
+}
+.nav__menu-icon i {
+  display: block;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform 0.35s var(--ease-out);
+}
+.nav[data-open='true'] .nav__menu-icon i:first-child {
+  transform: translateY(2.75px) rotate(45deg);
+}
+.nav[data-open='true'] .nav__menu-icon i:last-child {
+  transform: translateY(-2.75px) rotate(-45deg);
+}
+
+@media (min-width: 960px) {
+  .nav__links,
+  .nav__cta {
+    display: inline-flex;
+  }
+  .nav__menu-btn {
+    display: none;
+  }
+}
+
+/* ---------- mobile menu ---------- */
+
+.menu {
+  position: fixed;
+  inset: calc(var(--nav-h) + env(safe-area-inset-top, 0px)) 0 0 0;
+  z-index: 49;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menu__links {
+  display: grid;
+  padding-top: 24px;
+}
+
+.menu__links a {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.25rem, 10vw, 3.5rem);
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  padding-block: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.menu__foot {
+  display: grid;
+  gap: 14px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.menu__email {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--fg);
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+
+.menu__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}

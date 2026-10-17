@@ -1,0 +1,77 @@
+/*
+ * Layout: an asymmetric 12-column editorial grid on a dark "data display" ground.
+ * The recurring mark is the data point: the hero is a dot-matrix field, numbers are set
+ * in a dot-matrix face, and the three layers of the stack each own one hue.
+ *
+ * One deliberate dark theme (a lit display reads best on a dark ground), so every color
+ * is defined once on :root.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Ground and ink, biased slightly toward blue */
+  --bg: #0a0e13;
+  --bg-2: #0c1117;
+  --surface: #0f151c;
+  --surface-2: #141b24;
+  --line: #1b242f;
+  --line-2: #2a3542;
+  --fg: #e8ecef;
+  --fg-2: #b3bdc7;
+  --fg-3: #808c98;
+
+  /* The three layers. Validated as a categorical set on --bg (lightness band, CVD separation, 3:1). */
+  --move: #3a9fd4;
+  --explain: #bf8420;
+  --act: #d9547b;
+
+  /* Lighter steps for ambient light only (the hero field, glows), never for text */
+  --move-glow: #6cc6f0;
+  --explain-glow: #e8a94c;
+  --act-glow: #e06a92;
+
+  /* Type */
+  --font-display: 'Funnel Display', 'Funnel Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
+  --font-body: 'Funnel Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Martian Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  --font-dots: 'Doto', 'Martian Mono', ui-monospace, monospace;
+
+  --fs-name: clamp(3.9rem, 13vw, 12.5rem);
+  --fs-statement: clamp(1.75rem, 3.7vw, 3.4rem);
+  --fs-h2: clamp(2.6rem, 6.4vw, 5.5rem);
+  --fs-h3: clamp(1.4rem, 2.1vw, 1.875rem);
+  --fs-lead: clamp(1.125rem, 1.45vw, 1.3125rem);
+  --fs-body: 1.0625rem;
+  --fs-small: 0.9375rem;
+  --fs-label: 0.6875rem;
+  --fs-stat: clamp(3.4rem, 5.4vw, 5.1rem);
+
+  /* Space */
+  --gutter: clamp(16px, 4.5vw, 56px);
+  --pad-l: max(var(--gutter), env(safe-area-inset-left, 0px));
+  --pad-r: max(var(--gutter), env(safe-area-inset-right, 0px));
+  --maxw: 1320px;
+  --section-y: clamp(80px, 9vw, 128px);
+  --nav-h: 68px;
+
+  --radius-card: 16px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+[data-layer='move'] {
+  --c: var(--move);
+  --c-glow: var(--move-glow);
+  --c-rgb: 108 198 240;
+}
+[data-layer='explain'] {
+  --c: var(--explain);
+  --c-glow: var(--explain-glow);
+  --c-rgb: 232 169 76;
+}
+[data-layer='act'] {
+  --c: var(--act);
+  --c-glow: var(--act-glow);
+  --c-rgb: 224 106 146;
+}
